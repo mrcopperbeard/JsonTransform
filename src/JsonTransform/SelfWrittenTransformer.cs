@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json.Linq;
 
@@ -9,54 +10,67 @@ namespace JsonTransform
 	{
 		private readonly TransformationFactory _transformationFactory;
 
+		private readonly Stack<ITransformation> _transformations;
+
 		public SelfWrittenTransformer(TransformationFactory transformationFactory)
 		{
 			_transformationFactory = transformationFactory;
+			_transformations = new Stack<ITransformation>();
 		}
 
 		/// <inheritdoc />
-		public string Transform(string source, string transformation)
+		public string Transform(string source, string transformDescription)
 		{
 			var resultObject = JObject.Parse(source);
+			var transformationObject = JObject.Parse(transformDescription);
+			Walk(transformationObject, new StringBuilder());
 
-			Walk(resultObject, JObject.Parse(transformation), new StringBuilder());
+			resultObject.Merge(
+				transformationObject,
+				new JsonMergeSettings
+				{
+					MergeArrayHandling = MergeArrayHandling.Replace,
+					MergeNullValueHandling = MergeNullValueHandling.Merge,
+				});
+
+			var stackSize = _transformations.Count;
+			for (var i = 0; i < stackSize; i++)
+			{
+				_transformations.Pop().ApplyTo(resultObject);
+			}
 
 			return resultObject.ToString();
 		}
 
-		private void Walk(JObject result, JToken token, StringBuilder path)
+		private void Walk(JToken token, StringBuilder pathBuilder)
 		{
 			switch (token.Type)
 			{
 				case JTokenType.Object:
 					foreach (var property in ((JObject)token).Properties())
 					{
-						Walk(result, property, path.AppendNode(property.Name));
+						Walk(property, pathBuilder.AppendNode(property.Name));
 					}
 					break;
 				case JTokenType.Array:
 					var array = (JArray)token;
 					for (var i = 0; i < array.Count; i++)
 					{
-						Walk(result, array[i], path.Append($"[{i}]"));
+						Walk(array[i], pathBuilder.Append($"[{i}]"));
 					}
 					break;
 				case JTokenType.Property:
 					var prop = (JProperty)token;
-					Walk(result, prop.Value, path);
+					Walk(prop.Value, pathBuilder);
 					break;
 				case JTokenType.String:
-					var value = token.Value<string>();
-					var command = _transformationFactory.Create(value);
+					var command = _transformationFactory.Create(token.Value<string>(), pathBuilder.ToString());
+					if (command != null)
+					{
+						_transformations.Push(command);
+						// TODO: Удалять узлы с трансформацией.
+					}
 
-					if (command == null)
-					{
-						SetValue(result, value, path.ToString());
-					}
-					else
-					{
-						command.ApplyTo(result.SelectToken(path.ToString()));
-					}
 					break;
 				case JTokenType.Integer:
 				case JTokenType.Float:
@@ -69,22 +83,9 @@ namespace JsonTransform
 				case JTokenType.Guid:
 				case JTokenType.Uri:
 				case JTokenType.TimeSpan:
-					SetValue(result, ((JValue)token).Value, path.ToString());
 					break;
 				default:
-					throw new NotImplementedException($"{path}: {Enum.GetName(typeof(JTokenType), token.Type)} type is not implemented yet.");
-			}
-		}
-
-		private static void SetValue(JToken source, object value, string path)
-		{
-			try
-			{
-				((JValue)source.SelectToken(path)).Value = value;
-			}
-			catch (Exception e)
-			{
-				throw new InvalidOperationException($"Error settings value {value} to {path}. {e.Message}", e);
+					throw new NotImplementedException($"{pathBuilder}: {Enum.GetName(typeof(JTokenType), token.Type)} type is not implemented yet.");
 			}
 		}
 	}

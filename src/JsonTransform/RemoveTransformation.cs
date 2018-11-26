@@ -7,9 +7,29 @@ namespace JsonTransform
 	/// <inheritdoc />
 	internal class RemoveTransformation : ITransformation
 	{
-		/// <inheritdoc />
-		public void ApplyTo(JToken token)
+		/// <summary>
+		/// Путь к удаляемому элементу.
+		/// </summary>
+		private readonly string _path;
+
+		/// <summary>
+		/// Инициализация <see cref="RemoveTransformation"/>.
+		/// </summary>
+		/// <param name="path">Путь к удаляемому элементу.</param>
+		public RemoveTransformation(string path)
 		{
+			_path = path;
+		}
+
+		/// <inheritdoc />
+		public void ApplyTo(JObject obj)
+		{
+			var token = obj.SelectToken(_path);
+			if (token == null)
+			{
+				return;
+			}
+
 			try
 			{
 				token.Parent.Remove();

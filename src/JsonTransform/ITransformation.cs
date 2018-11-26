@@ -10,7 +10,7 @@ namespace JsonTransform
 		/// <summary>
 		/// Применить трансформацию.
 		/// </summary>
-		/// <param name="token">Узел, к которому применяется трансформация.</param>
-		void ApplyTo(JToken token);
+		/// <param name="obj">Объект, к которому применяется трансформация.</param>
+		void ApplyTo(JObject obj);
 	}
 }

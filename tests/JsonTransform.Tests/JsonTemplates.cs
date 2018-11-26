@@ -2,10 +2,10 @@
 {
 	public static class JsonTemplates
 	{
+		public const string EmptySource = @"{}";
+
 		public static class SetConstString
 		{
-			public const string EmptySource = @"{}";
-
 			public const string Source = @"{
 ""first"": {
 		""value"": 1
@@ -17,6 +17,25 @@
 ""first"": {
 		""value"": ""one""
 	},
+}";
+		}
+
+		public static class SetConstToArray
+		{
+			public const string Source = @"{
+""array"": [{
+			""value"": 1
+		}
+	]
+}";
+
+			public const string Transformation = @"{
+""array"": [{
+			""value"": ""one""
+		},{
+			""value"": ""two""
+		}
+	]
 }";
 		}
 

@@ -25,7 +25,7 @@ namespace JsonTransform.Tests
 
 		[TestCase(JsonTemplates.SetConstBool.Source, JsonTemplates.SetConstBool.Transformation, true)]
 		[TestCase(JsonTemplates.SetConstString.Source, JsonTemplates.SetConstString.Transformation, "one")]
-		[TestCase(JsonTemplates.SetConstString.EmptySource, JsonTemplates.SetConstString.Transformation, "one")]
+		[TestCase(JsonTemplates.EmptySource, JsonTemplates.SetConstString.Transformation, "one")]
 		public void Transform_SetConstant_ShouldWork<TExpected>(string source, string transformation, TExpected expected)
 		{
 			// act
@@ -34,6 +34,19 @@ namespace JsonTransform.Tests
 
 			// assert
 			resultObject["first"]["value"].Value<TExpected>().Should().Be(expected);
+		}
+
+		[TestCase(JsonTemplates.EmptySource)]
+		[TestCase(JsonTemplates.SetConstToArray.Source)]
+		public void Transform_SetConstantInArray_ShouldWork(string source)
+		{
+			// act
+			var resultString = _transformer.Transform(source, JsonTemplates.SetConstToArray.Transformation);
+			var resultObject = JObject.Parse(resultString);
+
+			// assert
+			resultObject["array"][0]["value"].Value<string>().Should().Be("one");
+			resultObject["array"][1]["value"].Value<string>().Should().Be("two");
 		}
 
 		[Test]
