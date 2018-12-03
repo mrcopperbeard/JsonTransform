@@ -22,7 +22,7 @@ namespace JsonTransform
 		}
 
 		/// <inheritdoc />
-		public void ApplyTo(JObject obj)
+		public void ApplyTo(JObject obj, ITransformationContext context)
 		{
 			var token = obj.SelectToken(_path);
 			if (token == null)

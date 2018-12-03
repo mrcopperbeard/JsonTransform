@@ -84,5 +84,56 @@ namespace JsonTransform.Tests
 			((JObject)resultObject["firstLevel"]).Property("secondLevel").Should().BeNull();
 			resultObject["firstLevel"]["secondLevel1"].Value<bool>().Should().BeTrue();
 		}
+
+		[Test]
+		public void Copy_ExistingObject_ShouldCopyAndLeaveSourceUntouched()
+		{
+			// act
+			var resultString = _transformer.Transform(JsonTemplates.CopyNode.SourceWithObject, JsonTemplates.CopyNode.Transformation);
+			var resultObject = JObject.Parse(resultString);
+
+			// assert
+			resultObject["target"]["value"].Value<bool>().Should().BeTrue();
+			resultObject["source"]["inner"]["value"].Value<bool>().Should().BeTrue();
+		}
+
+		[Test]
+		public void Copy_ExistingString_ShouldCopyAndLeaveSourceUntouched()
+		{
+			// arrange
+			const string Expected = "test";
+
+			// act
+			var resultString = _transformer.Transform(JsonTemplates.CopyNode.SourceWithString, JsonTemplates.CopyNode.Transformation);
+			var resultObject = JObject.Parse(resultString);
+
+			// assert
+			resultObject["target"].Value<string>().Should().Be(Expected);
+			resultObject["source"]["inner"].Value<string>().Should().Be(Expected);
+		}
+
+		[Test]
+		public void CopyRoot_ShouldCopyRoot()
+		{
+			// act
+			var resultString = _transformer.Transform(JsonTemplates.CopyNode.SourceWithObject, JsonTemplates.CopyNode.CopyRootTransformation);
+			var resultObject = JObject.Parse(resultString);
+
+			// assert
+			resultObject["target"]["source"]["inner"]["value"].Value<bool>().Should().BeTrue();
+		}
+
+		[Test]
+		public void Copy_WithInvalidPath_ShouldThrowCorrectException()
+		{
+			_transformer
+				.Invoking(_ => _.Transform(JsonTemplates.CopyNode.SourceWithObject, JsonTemplates.CopyNode.TransformationWitInvalidPath))
+				.Should()
+				.ThrowExactly<ArgumentException>()
+				.Which
+				.Message
+				.Should()
+				.Contain(InternalConstants.AvailablePathSymbols);
+		}
 	}
 }

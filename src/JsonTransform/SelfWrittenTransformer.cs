@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+
 using Newtonsoft.Json.Linq;
 
 namespace JsonTransform
@@ -22,7 +23,13 @@ namespace JsonTransform
 		public string Transform(string source, string transformDescription)
 		{
 			var resultObject = JObject.Parse(source);
+			var sourceObject = resultObject.DeepClone();
 			var transformationObject = JObject.Parse(transformDescription);
+			var transformContext = new TransformationContext
+			{
+				Source = sourceObject,
+			};
+
 			Walk(transformationObject, new StringBuilder());
 
 			resultObject.Merge(
@@ -36,7 +43,7 @@ namespace JsonTransform
 			var stackSize = _transformations.Count;
 			for (var i = 0; i < stackSize; i++)
 			{
-				_transformations.Pop().ApplyTo(resultObject);
+				_transformations.Pop().ApplyTo(resultObject, transformContext);
 			}
 
 			return resultObject.ToString();
@@ -68,7 +75,6 @@ namespace JsonTransform
 					if (command != null)
 					{
 						_transformations.Push(command);
-						// TODO: Удалять узлы с трансформацией.
 					}
 
 					break;

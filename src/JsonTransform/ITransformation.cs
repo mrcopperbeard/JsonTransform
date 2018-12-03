@@ -11,6 +11,6 @@ namespace JsonTransform
 		/// Применить трансформацию.
 		/// </summary>
 		/// <param name="obj">Объект, к которому применяется трансформация.</param>
-		void ApplyTo(JObject obj);
+		void ApplyTo(JObject obj, ITransformationContext context);
 	}
 }
