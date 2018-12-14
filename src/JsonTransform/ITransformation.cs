@@ -5,12 +5,13 @@ namespace JsonTransform
 	/// <summary>
 	/// Трансформация над объектом <see cref="JObject"/>.
 	/// </summary>
-	public interface ITransformation
+	internal interface ITransformation
 	{
 		/// <summary>
 		/// Применить трансформацию.
 		/// </summary>
-		/// <param name="obj">Объект, к которому применяется трансформация.</param>
-		void ApplyTo(JObject obj, ITransformationContext context);
+		/// <param name="target">Объект, к которому применяется трансформация.</param>
+		/// <param name="context">Контекст трансформации.</param>
+		void ApplyTo(JObject target, ITransformationContext context);
 	}
 }

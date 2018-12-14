@@ -1,33 +1,51 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 
+using Newtonsoft.Json.Linq;
+
 namespace JsonTransform
 {
-	public class TransformationFactory
+	internal class TransformationFactory
 	{
+		private static readonly Regex TransformationPatternRegex = new Regex($"{TransformationPrefix}{Separator}[a-zA-Z]+{Separator}");
+
 		/// <summary>
-		/// Регулярное выражение для извлечения аргументов трансформации.
+		/// Префикс трансформаций.
 		/// </summary>
-		private static readonly Regex TransformationSingleArgumentRegex = new Regex($@"^\#[a-zA-Z]+\(({InternalConstants.AvailablePathSymbols})\)$");
+		internal const string TransformationPrefix = "transform";
 
-		public ITransformation Create(string value, string path)
+		/// <summary>
+		/// Знак разделитель.
+		/// </summary>
+		internal const char Separator = '-';
+
+		public static ITransformation Create(JProperty property)
 		{
-			if (value == "#remove")
+			var propertyNameParts = property.Name.Split(Separator);
+			if (propertyNameParts.Length < 3 || propertyNameParts[0] != TransformationPrefix)
 			{
-				return new RemoveTransformation(path);
+				return null;
 			}
 
-			if (value.StartsWith("#copyFrom"))
+			var targetPath = TransformationPatternRegex.Replace(property.Path, string.Empty);
+
+			switch (propertyNameParts[1])
 			{
-				var matches = TransformationSingleArgumentRegex.Matches(value);
-				var sourcePath = matches.Count > 0
-					? matches[0].Groups[1].Value
-					: throw new ArgumentException($"Can not parse path to copying node \"{path}\". Path may contain only \"{InternalConstants.AvailablePathSymbols}\".");
+				case "remove":
+					return new RemoveTransformation(targetPath);
+				case "copy":
+					var sourcePath = property.Value.Value<string>();
 
-				return new CopyTransformation(sourcePath, path);
+					return new CopyTransformation(sourcePath, targetPath);
+				case "foreach":
+					return new ForEachTransformation(targetPath, (JObject)property.Value);
+				case "union":
+					return new UnionTransformation(targetPath, property.Value);
+				case "setnull":
+					return new SetNullTransformation(targetPath);
+				default:
+					return null;
 			}
-
-			return null;
 		}
 	}
 }

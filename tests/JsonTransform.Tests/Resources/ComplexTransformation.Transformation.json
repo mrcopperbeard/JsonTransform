@@ -1,0 +1,14 @@
+{
+  "transform-remove-link": "nevermind",
+  "channel": {
+    "title": "James Newton-King",
+    "transform-copy-link": "link",
+    "transform-copy-description": "channel.item[1].channelDescription",
+    "transform-foreach-item": {
+      "transform-copy-link": "channel.item[1].link",
+      "transform-remove-odd": null,
+      "transform-remove-channelDescription": null,
+      "transform-union-category": [ "Json.NET" ]
+    }
+  }
+}

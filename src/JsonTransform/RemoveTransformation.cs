@@ -4,27 +4,21 @@ using Newtonsoft.Json.Linq;
 
 namespace JsonTransform
 {
-	/// <inheritdoc />
-	internal class RemoveTransformation : ITransformation
+	/// <summary>
+	/// Delete node transformation.
+	/// </summary>
+	internal class RemoveTransformation : BaseTransformation, ITransformation
 	{
-		/// <summary>
-		/// Путь к удаляемому элементу.
-		/// </summary>
-		private readonly string _path;
-
-		/// <summary>
-		/// Инициализация <see cref="RemoveTransformation"/>.
-		/// </summary>
-		/// <param name="path">Путь к удаляемому элементу.</param>
-		public RemoveTransformation(string path)
+		/// <inheritdoc />
+		public RemoveTransformation(string targetPath)
+			: base(targetPath)
 		{
-			_path = path;
 		}
 
 		/// <inheritdoc />
-		public void ApplyTo(JObject obj, ITransformationContext context)
+		public void ApplyTo(JObject target, ITransformationContext context)
 		{
-			var token = obj.SelectToken(_path);
+			var token = target.SelectToken(TargetPath);
 			if (token == null)
 			{
 				return;

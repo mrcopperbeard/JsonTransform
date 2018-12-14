@@ -23,17 +23,35 @@
 		public static class SetConstToArray
 		{
 			public const string Source = @"{
+	""rootItem"": ""root item"",
 	""array"": [{
-			""value"": 1
+			""value"": 1,
+			""otherValue"": 2,
+			""inner"": {
+				""innerValue1"": ""inner value 1""
+			},
+			""innerArray"": [""First""]
+		},{
+			""inner"": {
+				""innerValue4"": ""inner value 4""
+			}
 		}
 	]
 }";
 
 			public const string Transformation = @"{
 	""array"": [{
-			""value"": ""one""
+			""value"": ""one"",
+			""inner"": {
+				""innerValue2"": ""inner value 2""
+			},
+			""innerArray"": [""Second""]
 		},{
-			""value"": ""two""
+			""value"": ""two"",
+			""inner"": {
+				""innerValue3"": ""inner value 3"",
+				""odd"": ""some odd property""
+			}
 		}
 	]
 }";
@@ -67,7 +85,7 @@
 
 			public const string Transformation = @"{
 	""first"": {
-		""value"": null
+		""transform-setnull-value"": ""any value that will be ignored""
 	},
 }";
 		}
@@ -86,11 +104,11 @@
 
 			public const string RemoveSecondLevel = @"{
 	""firstLevel"": {
-		""secondLevel"": ""#remove""
+		""transform-remove-secondLevel"": null
 	}
 }";
 
-			public const string RemoveFirstLevel = @"{ ""firstLevel"": ""#remove"" }";
+			public const string RemoveFirstLevel = @"{ ""transform-remove-firstLevel"": null }";
 		}
 
 		public static class CopyNode
@@ -101,21 +119,47 @@
 			""value"": true
 		},
 	},
-	""target"": ""#copyFrom(source.inner)""
+	""target"": null
 }";
 
 			public const string SourceWithString = @"{
 	""source"": {
 		""inner"": ""test""
 	},
-	""target"": ""#copyFrom(source.inner)""
+	""target"": null
 }";
 
-			public const string Transformation = @"{ ""target"": ""#copyFrom(source.inner)"" }";
+			public const string SourceWithoutTarget = @"{
+	""source"": {
+		""inner"": ""test""
+	}
+}";
 
-			public const string CopyRootTransformation = @"{ ""target"": ""#copyFrom()"" }";
+			public const string Transformation = @"{ ""transform-copy-target"": ""source.inner"" }";
 
-			public const string TransformationWitInvalidPath = @"{ ""target"": ""#copyFrom(#)"" }";
+			public const string CopyRootTransformation = @"{ ""transform-copy-target"": null }";
+		}
+
+		public static class ForEach
+		{
+			public const string Source = @"{
+	""array"": [
+		{
+			""source"": ""Expected"",
+			""removeMe"": ""Remove me""
+		},{
+			""removeMe"": ""Remove me too""
+		},{
+		}
+	]
+}";
+
+			public const string Transformation = @"{
+	""transform-foreach-array"": {
+		""transform-remove-removeMe"": null,
+		""transform-copy-target"": ""array[0].source"",
+	}
+}";
 		}
 	}
 }
