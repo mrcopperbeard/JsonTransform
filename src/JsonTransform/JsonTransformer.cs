@@ -21,14 +21,28 @@ namespace JsonTransform
 		};
 
 		/// <summary>
-		/// Преобразовать исходный JSON-объект при помощи указанной трансформации.
+		/// Transform specified JSON-object with specified transformation.
 		/// </summary>
-		/// <param name="source">Исходный JSON-объект.</param>
-		/// <param name="transformation">Объект с трансформацией.</param>
-		/// <returns>Трансформированный JSON-объект.</returns>
+		/// <param name="source">Source JSON-object.</param>
+		/// <param name="transformation">Transformation meta object.</param>
+		/// <returns>Transformed JSON-object.</returns>
 		public static JObject Transform(JObject source, JObject transformation)
 		{
 			return Transform(source, transformation, null);
+		}
+
+		/// <summary>
+		/// Transform specified string with JSON with specified transformation.
+		/// </summary>
+		/// <param name="source">Source JSON string.</param>
+		/// <param name="transformDescription">String with transformation meta.</param>
+		/// <returns>Transformed JSON-string.</returns>
+		public static JObject Transform(string source, string transformDescription)
+		{
+			var sourceObject = JObject.Parse(source);
+			var transformationObject = JObject.Parse(transformDescription);
+
+			return Transform(sourceObject, transformationObject);
 		}
 
 		/// <summary>
@@ -60,19 +74,10 @@ namespace JsonTransform
 		}
 
 		/// <summary>
-		/// Преобразовать исходную строку при помощи указанной трансформации.
+		/// Walk around transformation object, and collect all transformations.
 		/// </summary>
-		/// <param name="source">Исходная строка.</param>
-		/// <param name="transformDescription">Строка с трансформацией.</param>
-		/// <returns>Трансформированный JSON-объект.</returns>
-		public static JObject Transform(string source, string transformDescription)
-		{
-			var sourceObject = JObject.Parse(source);
-			var transformationObject = JObject.Parse(transformDescription);
-
-			return Transform(sourceObject, transformationObject);
-		}
-
+		/// <param name="token">Transformation object.</param>
+		/// <param name="transformations">Stack with transformations.</param>
 		private static void Walk(JToken token, Stack<ITransformation> transformations)
 		{
 			switch (token.Type)

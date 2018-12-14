@@ -117,7 +117,7 @@
 	""source"": {
 		""inner"": {
 			""value"": true
-		},
+		}
 	},
 	""target"": null
 }";
