@@ -8,29 +8,18 @@ using NUnit.Framework;
 namespace JsonTransform.Tests
 {
 	/// <summary>
-	/// Тесты для <see cref="IJsonTransformer"/>.
+	/// Тесты для <see cref="JsonTransformer"/>.
 	/// </summary>
 	[TestFixture]
 	public class TransformTests
 	{
-		/// <summary>
-		/// Тестируемый объект.
-		/// </summary>
-		private IJsonTransformer _transformer;
-
-		[SetUp]
-		public void Setup()
-		{
-			_transformer = new JsonTransformer();
-		}
-
 		[TestCase(JsonTemplates.SetConstBool.Source, JsonTemplates.SetConstBool.Transformation, true)]
 		[TestCase(JsonTemplates.SetConstString.Source, JsonTemplates.SetConstString.Transformation, "one")]
 		[TestCase(JsonTemplates.EmptySource, JsonTemplates.SetConstString.Transformation, "one")]
 		public void Transform_SetConstant_ShouldWork<TExpected>(string source, string transformation, TExpected expected)
 		{
 			// act
-			var resultObject = _transformer.Transform(source, transformation);
+			var resultObject = JsonTransformer.Transform(source, transformation);
 
 			// assert
 			resultObject["first"]["value"].Value<TExpected>().Should().Be(expected);
@@ -41,7 +30,7 @@ namespace JsonTransform.Tests
 		public void Transform_SetConstantInEmptyArray_ShouldWork()
 		{
 			// act
-			var resultObject = _transformer.Transform(JsonTemplates.EmptySource, JsonTemplates.SetConstToArray.Transformation);
+			var resultObject = JsonTransformer.Transform(JsonTemplates.EmptySource, JsonTemplates.SetConstToArray.Transformation);
 
 			// assert
 			resultObject["array"][0]["value"].Value<string>().Should().Be("one");
@@ -53,7 +42,7 @@ namespace JsonTransform.Tests
 		public void Transform_SetConstantInArray_ShouldWork()
 		{
 			// act
-			var resultObject = _transformer.Transform(JsonTemplates.SetConstToArray.Source, JsonTemplates.SetConstToArray.Transformation);
+			var resultObject = JsonTransformer.Transform(JsonTemplates.SetConstToArray.Source, JsonTemplates.SetConstToArray.Transformation);
 
 			// assert
 			resultObject["array"][0]["value"].Value<string>().Should().Be("one");
@@ -75,7 +64,7 @@ namespace JsonTransform.Tests
 		public void Transform_SetNull_ShouldWork()
 		{
 			// act
-			var resultObject = _transformer.Transform(JsonTemplates.SetNull.Source, JsonTemplates.SetNull.Transformation);
+			var resultObject = JsonTransformer.Transform(JsonTemplates.SetNull.Source, JsonTemplates.SetNull.Transformation);
 
 			// assert
 			resultObject["first"]["value"].Value<string>().Should().BeNull();
@@ -87,7 +76,7 @@ namespace JsonTransform.Tests
 		public void Remove_FirstLevel_ShouldWork()
 		{
 			// act
-			var resultObject = _transformer.Transform(JsonTemplates.RemoveNode.Source, JsonTemplates.RemoveNode.RemoveFirstLevel);
+			var resultObject = JsonTransformer.Transform(JsonTemplates.RemoveNode.Source, JsonTemplates.RemoveNode.RemoveFirstLevel);
 
 			// assert
 			resultObject.Property("firstLevel").Should().BeNull();
@@ -99,7 +88,7 @@ namespace JsonTransform.Tests
 		public void Remove_SecondLevel_ShouldWork()
 		{
 			// act
-			var resultObject = _transformer.Transform(JsonTemplates.RemoveNode.Source, JsonTemplates.RemoveNode.RemoveSecondLevel);
+			var resultObject = JsonTransformer.Transform(JsonTemplates.RemoveNode.Source, JsonTemplates.RemoveNode.RemoveSecondLevel);
 
 			// assert
 			((JObject)resultObject["firstLevel"]).Property("secondLevel").Should().BeNull();
@@ -111,7 +100,7 @@ namespace JsonTransform.Tests
 		public void Copy_ExistingObject_ShouldCopyAndLeaveSourceUntouched()
 		{
 			// act
-			var resultObject = _transformer.Transform(JsonTemplates.CopyNode.SourceWithObject, JsonTemplates.CopyNode.Transformation);
+			var resultObject = JsonTransformer.Transform(JsonTemplates.CopyNode.SourceWithObject, JsonTemplates.CopyNode.Transformation);
 
 			// assert
 			resultObject["target"]["value"].Value<bool>().Should().BeTrue();
@@ -127,7 +116,7 @@ namespace JsonTransform.Tests
 			const string Expected = "test";
 
 			// act
-			var resultObject = _transformer.Transform(source, JsonTemplates.CopyNode.Transformation);
+			var resultObject = JsonTransformer.Transform(source, JsonTemplates.CopyNode.Transformation);
 
 			// assert
 			resultObject["target"].Value<string>().Should().Be(Expected);
@@ -139,7 +128,7 @@ namespace JsonTransform.Tests
 		public void CopyRoot_ShouldCopyRoot()
 		{
 			// act
-			var resultObject = _transformer.Transform(JsonTemplates.CopyNode.SourceWithObject, JsonTemplates.CopyNode.CopyRootTransformation);
+			var resultObject = JsonTransformer.Transform(JsonTemplates.CopyNode.SourceWithObject, JsonTemplates.CopyNode.CopyRootTransformation);
 
 			// assert
 			resultObject["target"]["source"]["inner"]["value"].Value<bool>().Should().BeTrue();
@@ -150,7 +139,7 @@ namespace JsonTransform.Tests
 		public void ForEach_ShouldApplyTransformation_ToEachArrayItem()
 		{
 			// act
-			var resultObject = _transformer.Transform(JsonTemplates.ForEach.Source, JsonTemplates.ForEach.Transformation);
+			var resultObject = JsonTransformer.Transform(JsonTemplates.ForEach.Source, JsonTemplates.ForEach.Transformation);
 
 			Console.Out.WriteLine(resultObject.ToString());
 
@@ -175,7 +164,7 @@ namespace JsonTransform.Tests
 			var expectedObject = JObject.Parse(expectedString);
 
 			// act
-			var resultObject = _transformer.Transform(Resources.ComplexTransformation_Source, Resources.ComplexTransformation_Transformation);
+			var resultObject = JsonTransformer.Transform(Resources.ComplexTransformation_Source, Resources.ComplexTransformation_Transformation);
 
 			// assert
 			JToken.DeepEquals(resultObject, expectedObject).Should().BeTrue($"Expected to be {expectedString} but found {resultObject}");

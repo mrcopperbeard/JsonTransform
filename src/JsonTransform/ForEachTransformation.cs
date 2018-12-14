@@ -26,12 +26,11 @@ namespace JsonTransform
 			var token = target.SelectToken(TargetPath);
 			if (token is JArray targetArray)
 			{
-				var transformer = new JsonTransformer();
 				for (var i = 0; i < targetArray.Count; i++)
 				{
 					if (targetArray[i] is JObject targetObject)
 					{
-						targetObject.Replace(transformer.Transform(targetObject, (JObject)_transformationObject.DeepClone(), context));
+						targetObject.Replace(JsonTransformer.Transform(targetObject, (JObject)_transformationObject.DeepClone(), context));
 					}
 					else
 					{

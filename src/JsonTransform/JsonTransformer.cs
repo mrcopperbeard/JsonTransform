@@ -6,8 +6,10 @@ using Newtonsoft.Json.Linq;
 
 namespace JsonTransform
 {
-	/// <inheritdoc />
-	public sealed class JsonTransformer : IJsonTransformer
+	/// <summary>
+	/// Static JSON transformer.
+	/// </summary>
+	public static class JsonTransformer
 	{
 		/// <summary>
 		/// Merge settings.
@@ -18,15 +20,13 @@ namespace JsonTransform
 			MergeNullValueHandling = MergeNullValueHandling.Ignore,
 		};
 
-		private readonly Stack<ITransformation> _transformations;
-
-		public JsonTransformer()
-		{
-			_transformations = new Stack<ITransformation>();
-		}
-
-		/// <inheritdoc />
-		public JObject Transform(JObject source, JObject transformation)
+		/// <summary>
+		/// Преобразовать исходный JSON-объект при помощи указанной трансформации.
+		/// </summary>
+		/// <param name="source">Исходный JSON-объект.</param>
+		/// <param name="transformation">Объект с трансформацией.</param>
+		/// <returns>Трансформированный JSON-объект.</returns>
+		public static JObject Transform(JObject source, JObject transformation)
 		{
 			return Transform(source, transformation, null);
 		}
@@ -38,28 +38,34 @@ namespace JsonTransform
 		/// <param name="transformation">Объект с трансформацией.</param>
 		/// <param name="transformContext">Контекст трансформации.</param>
 		/// <returns>Трансформированный JSON-объект.</returns>
-		internal JObject Transform(JObject source, JObject transformation, ITransformationContext transformContext)
+		internal static JObject Transform(JObject source, JObject transformation, ITransformationContext transformContext)
 		{
 			var resultObject = (JObject)source.DeepClone();
+			var transformations = new Stack<ITransformation>();
 			transformContext = transformContext ?? new TransformationContext
 			{
 				Source = source,
 			};
 
-			Walk(transformation);
+			Walk(transformation, transformations);
 
 			resultObject.Merge(transformation, MergeSettings);
 
-			while(_transformations.Count > 0)
+			while(transformations.Count > 0)
 			{
-				_transformations.Pop().ApplyTo(resultObject, transformContext);
+				transformations.Pop().ApplyTo(resultObject, transformContext);
 			}
 
 			return resultObject;
 		}
 
-		/// <inheritdoc />
-		public JObject Transform(string source, string transformDescription)
+		/// <summary>
+		/// Преобразовать исходную строку при помощи указанной трансформации.
+		/// </summary>
+		/// <param name="source">Исходная строка.</param>
+		/// <param name="transformDescription">Строка с трансформацией.</param>
+		/// <returns>Трансформированный JSON-объект.</returns>
+		public static JObject Transform(string source, string transformDescription)
 		{
 			var sourceObject = JObject.Parse(source);
 			var transformationObject = JObject.Parse(transformDescription);
@@ -67,7 +73,7 @@ namespace JsonTransform
 			return Transform(sourceObject, transformationObject);
 		}
 
-		private void Walk(JToken token)
+		private static void Walk(JToken token, Stack<ITransformation> transformations)
 		{
 			switch (token.Type)
 			{
@@ -75,14 +81,14 @@ namespace JsonTransform
 					var properties = ((JObject) token).Properties().ToArray();
 					foreach (var property in properties)
 					{
-						Walk(property);
+						Walk(property, transformations);
 					}
 
 					break;
 				case JTokenType.Array:
 					foreach (var item in (JArray)token)
 					{
-						Walk(item);
+						Walk(item, transformations);
 					}
 					break;
 				case JTokenType.Property:
@@ -90,7 +96,7 @@ namespace JsonTransform
 					var command = TransformationFactory.Create(prop);
 					if (command != null)
 					{
-						_transformations.Push(command);
+						transformations.Push(command);
 
 						var cleanName = prop.Name.Split(TransformationFactory.Separator).Last();
 						prop.Replace(new JProperty(cleanName, null));
@@ -98,7 +104,7 @@ namespace JsonTransform
 						return;
 					}
 
-					Walk(prop.Value);
+					Walk(prop.Value, transformations);
 					break;
 			}
 		}
