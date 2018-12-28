@@ -221,3 +221,11 @@ console output will be
   }
 }
 ```
+
+## Custom transformations
+
+You can use your own transformations in JsonTransform. Just implement `ITransformation` interface and register your transform with
+static `JsonTransformer.RegisterTransformation` method. First parameter is a code of your transformation, which you can call from
+transformation JSON file. For forward compability custom transformations mark with prefix `transform-custom-`, so don't worry about conflicts with built-in transformations.
+
+[See usage example](https://github.com/mrcopperbeard/JsonTransform/blob/master/tests/JsonTransform.Tests/CustomTransform/CustomTransformationsTests.cs)
