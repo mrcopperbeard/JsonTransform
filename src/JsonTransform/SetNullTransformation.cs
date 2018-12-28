@@ -5,16 +5,16 @@ namespace JsonTransform
 	/// <summary>
 	/// Set null to current node.
 	/// </summary>
-	internal class SetNullTransformation : BaseTransformation, ITransformation
+	internal class SetNullTransformation : BaseTransformation
 	{
 		/// <inheritdoc />
-		public SetNullTransformation(string targetPath)
-			: base(targetPath)
+		public SetNullTransformation(ITransformationCreateContext context)
+			: base(context)
 		{
 		}
 
 		/// <inheritdoc />
-		public void ApplyTo(JObject target, ITransformationContext context)
+		public override void ApplyTo(JObject target, ITransformationInvokeContext context)
 		{
 			var targetToken = (JValue)target.SelectToken(TargetPath);
 

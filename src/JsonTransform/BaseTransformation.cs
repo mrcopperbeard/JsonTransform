@@ -1,22 +1,27 @@
-﻿namespace JsonTransform
+﻿using Newtonsoft.Json.Linq;
+
+namespace JsonTransform
 {
 	/// <summary>
-	/// Реализация базовой трансформации.
+	/// Base transformation.
 	/// </summary>
-	internal abstract class BaseTransformation
+	public abstract class BaseTransformation : ITransformation
 	{
 		/// <summary>
 		/// Initialize of <see cref="BaseTransformation"/>.
 		/// </summary>
-		/// <param name="targetPath">Path to node.</param>
-		protected BaseTransformation(string targetPath)
+		/// <param name="context">Transformation create context.</param>
+		protected BaseTransformation(ITransformationCreateContext context)
 		{
-			TargetPath = targetPath;
+			TargetPath = context.TargetPath;
 		}
 
 		/// <summary>
 		/// Path to node.
 		/// </summary>
 		protected string TargetPath { get; }
+
+		/// <inheritdoc />
+		public abstract void ApplyTo(JObject target, ITransformationInvokeContext context);
 	}
 }

@@ -7,7 +7,7 @@ namespace JsonTransform
 	/// <summary>
 	/// Add element transformation.
 	/// </summary>
-	internal class UnionTransformation : BaseTransformation, ITransformation
+	internal class UnionTransformation : BaseTransformation
 	{
 		/// <summary>
 		/// Merge settings.
@@ -23,14 +23,14 @@ namespace JsonTransform
 		private readonly JToken _argument;
 
 		/// <inheritdoc />
-		public UnionTransformation(string targetPath, JToken argument)
-			: base(targetPath)
+		public UnionTransformation(ITransformationCreateContext context)
+			: base(context)
 		{
-			_argument = argument;
+			_argument = context.Property.Value;
 		}
 
 		/// <inheritdoc />
-		public void ApplyTo(JObject target, ITransformationContext context)
+		public override void ApplyTo(JObject target, ITransformationInvokeContext context)
 		{
 			var token = target.SelectToken(TargetPath);
 			switch (token)

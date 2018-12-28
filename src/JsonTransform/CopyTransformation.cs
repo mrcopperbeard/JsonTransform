@@ -7,22 +7,22 @@ namespace JsonTransform
 	/// <summary>
 	/// Copy node transformation.
 	/// </summary>
-	internal class CopyTransformation : BaseTransformation, ITransformation
+	internal class CopyTransformation : BaseTransformation
 	{
 		/// <summary>
-		/// Путь, откуда нужно скопировать узел.
+		/// Path to copying node in source object.
 		/// </summary>
 		private readonly string _sourcePath;
 
 		/// <inheritdoc />
-		public CopyTransformation(string sourcePath, string targetPath)
-			: base(targetPath)
+		public CopyTransformation(ITransformationCreateContext context)
+			: base(context)
 		{
-			_sourcePath = sourcePath;
+			_sourcePath = context.Property.Value.Value<string>();
 		}
 
 		/// <inheritdoc />
-		public void ApplyTo(JObject target, ITransformationContext context)
+		public override void ApplyTo(JObject target, ITransformationInvokeContext context)
 		{
 			var copyingToken = context.Source.SelectToken(_sourcePath ?? string.Empty);
 			var targetToken = target.SelectToken(TargetPath);

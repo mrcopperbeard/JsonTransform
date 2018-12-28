@@ -5,7 +5,7 @@ namespace JsonTransform
 	/// <summary>
 	/// Контекст трансформации.
 	/// </summary>
-	internal interface ITransformationContext
+	public interface ITransformationInvokeContext
 	{
 		/// <summary>
 		/// Объект до трансформации.

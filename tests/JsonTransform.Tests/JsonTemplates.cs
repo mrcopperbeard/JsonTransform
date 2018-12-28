@@ -161,5 +161,20 @@
 	}
 }";
 		}
+
+		public static class Custom
+		{
+			public const string Source = @"{
+	""root"": {
+		""value"": 1
+	}
+}";
+
+			public const string Transformation = @"{
+	""root"": {
+		""transform-custom-test-value"": null
+	},
+}";
+		}
 	}
 }

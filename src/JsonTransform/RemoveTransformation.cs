@@ -7,16 +7,16 @@ namespace JsonTransform
 	/// <summary>
 	/// Delete node transformation.
 	/// </summary>
-	internal class RemoveTransformation : BaseTransformation, ITransformation
+	internal class RemoveTransformation : BaseTransformation
 	{
 		/// <inheritdoc />
-		public RemoveTransformation(string targetPath)
-			: base(targetPath)
+		public RemoveTransformation(ITransformationCreateContext context)
+			: base(context)
 		{
 		}
 
 		/// <inheritdoc />
-		public void ApplyTo(JObject target, ITransformationContext context)
+		public override void ApplyTo(JObject target, ITransformationInvokeContext context)
 		{
 			var token = target.SelectToken(TargetPath);
 			if (token == null)

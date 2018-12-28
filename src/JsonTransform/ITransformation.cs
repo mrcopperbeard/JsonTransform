@@ -3,15 +3,15 @@
 namespace JsonTransform
 {
 	/// <summary>
-	/// Трансформация над объектом <see cref="JObject"/>.
+	/// Transformation of <see cref="JObject"/>.
 	/// </summary>
-	internal interface ITransformation
+	public interface ITransformation
 	{
 		/// <summary>
-		/// Применить трансформацию.
+		/// Apply transformation.
 		/// </summary>
-		/// <param name="target">Объект, к которому применяется трансформация.</param>
-		/// <param name="context">Контекст трансформации.</param>
-		void ApplyTo(JObject target, ITransformationContext context);
+		/// <param name="target">Target object.</param>
+		/// <param name="context">Transformation context.</param>
+		void ApplyTo(JObject target, ITransformationInvokeContext context);
 	}
 }

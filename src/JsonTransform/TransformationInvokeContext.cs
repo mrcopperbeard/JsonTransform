@@ -3,7 +3,7 @@
 namespace JsonTransform
 {
 	/// <inheritdoc />
-	internal class TransformationContext : ITransformationContext
+	internal class TransformationInvokeContext : ITransformationInvokeContext
 	{
 		/// <inheritdoc />
 		public JToken Source { get; set; }

@@ -7,7 +7,7 @@ namespace JsonTransform
 	/// <summary>
 	/// Implement another transformation for each element of array.
 	/// </summary>
-	internal class ForEachTransformation : BaseTransformation, ITransformation
+	internal class ForEachTransformation : BaseTransformation
 	{
 		/// <summary>
 		/// Transformation object.
@@ -15,13 +15,14 @@ namespace JsonTransform
 		private readonly JObject _transformationObject;
 
 		/// <inheritdoc />
-		public ForEachTransformation(string targetPath, JObject transformationObject)
-			: base(targetPath)
+		public ForEachTransformation(ITransformationCreateContext context)
+			: base(context)
 		{
-			_transformationObject = (JObject)transformationObject.DeepClone();
+			_transformationObject = (JObject)context.Property.Value.DeepClone();
 		}
 
-		public void ApplyTo(JObject target, ITransformationContext context)
+		/// <inheritdoc />
+		public override void ApplyTo(JObject target, ITransformationInvokeContext context)
 		{
 			var token = target.SelectToken(TargetPath);
 			if (token is JArray targetArray)
