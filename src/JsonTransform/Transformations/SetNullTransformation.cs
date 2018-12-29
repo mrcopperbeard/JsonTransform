@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 
-namespace JsonTransform
+namespace JsonTransform.Transformations
 {
 	/// <summary>
 	/// Set null to current node.

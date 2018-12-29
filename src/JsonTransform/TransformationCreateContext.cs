@@ -3,7 +3,7 @@
 namespace JsonTransform
 {
 	/// <inheritdoc />
-	public class TransformationCreateContext : ITransformationCreateContext
+	internal class TransformationCreateContext : ITransformationCreateContext
 	{
 		/// <inheritdoc />
 		public string TargetPath { get; set; }

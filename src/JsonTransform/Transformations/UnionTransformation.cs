@@ -1,8 +1,7 @@
 ﻿using System;
-
 using Newtonsoft.Json.Linq;
 
-namespace JsonTransform
+namespace JsonTransform.Transformations
 {
 	/// <summary>
 	/// Add element transformation.
