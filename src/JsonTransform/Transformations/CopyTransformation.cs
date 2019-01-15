@@ -24,16 +24,20 @@ namespace JsonTransform.Transformations
 		public override void ApplyTo(JObject target, ITransformationInvokeContext context)
 		{
 			var copyingToken = context.Source.SelectToken(_sourcePath ?? string.Empty);
-			var targetToken = target.SelectToken(TargetPath);
+			var targetToken = target.SelectToken(Context.TargetPath);
 
 			if (copyingToken == null)
 			{
-				throw new InvalidOperationException($"Unable to find node \"{_sourcePath}\" to copy from it.");
+				OnErrorInternal($"Unable to find node \"{_sourcePath}\" to copy from it.");
+
+				return;
 			}
 
 			if (targetToken == null)
 			{
-				throw new InvalidOperationException($"Unable to find node \"{TargetPath}\" to copy there.");
+				OnErrorInternal($"Unable to find node \"{Context.TargetPath}\" to copy there.");
+
+				return;
 			}
 
 			targetToken.Replace(copyingToken);

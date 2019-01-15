@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+
 using JsonTransform.Transformations;
 using Newtonsoft.Json.Linq;
 
@@ -46,9 +47,12 @@ namespace JsonTransform
 		/// <param name="source">Source JSON-object.</param>
 		/// <param name="transformation">Transformation meta object.</param>
 		/// <returns>Transformed JSON-object.</returns>
-		public static JObject Transform(JObject source, JObject transformation)
+		public static ITransformationResult Transform(JObject source, JObject transformation)
 		{
-			return Transform(source, transformation, null);
+			var errors = new List<string>();
+			var resultObject = Transform(source, transformation, null, (sender, args) => errors.Add($"{args.TargetPath}: {args.Message}"));
+
+			return new TransformationResult(resultObject, errors);
 		}
 
 		/// <summary>
@@ -57,7 +61,7 @@ namespace JsonTransform
 		/// <param name="source">Source JSON string.</param>
 		/// <param name="transformDescription">String with transformation meta.</param>
 		/// <returns>Transformed JSON-string.</returns>
-		public static JObject Transform(string source, string transformDescription)
+		public static ITransformationResult Transform(string source, string transformDescription)
 		{
 			var sourceObject = JObject.Parse(source);
 			var transformationObject = JObject.Parse(transformDescription);
@@ -65,6 +69,11 @@ namespace JsonTransform
 			return Transform(sourceObject, transformationObject);
 		}
 
+		/// <summary>
+		/// Register custom transformation.
+		/// </summary>
+		/// <param name="code">Code of custom transformation.</param>
+		/// <param name="activator">Activator of transformation.</param>
 		public static void RegisterTransformation(string code, TransformationActivator activator)
 		{
 			foreach (var symbol in code)
@@ -88,26 +97,34 @@ namespace JsonTransform
 		/// <summary>
 		/// Transform specified JSON-object with specified transformation.
 		/// </summary>
-		/// <param name="source">Source JSON-object.</param>
-		/// <param name="transformation">Transformation meta object.</param>
+		/// <param name="sourceObject">Source JSON-object.</param>
+		/// <param name="transformationObject">Transformation meta object.</param>
 		/// <param name="transformContext">Transformation context.</param>
-		/// <returns>Transformed JSON-object.</returns>
-		internal static JObject Transform(JObject source, JObject transformation, ITransformationInvokeContext transformContext)
+		/// <param name="errorHandler">Error handler.</param>
+		/// <returns>Transformation result object.</returns>
+		internal static JObject Transform(
+			JObject sourceObject,
+			JObject transformationObject,
+			ITransformationInvokeContext transformContext,
+			EventHandler<TransformErrorEventArgs> errorHandler)
 		{
-			var resultObject = (JObject)source.DeepClone();
+			var resultObject = (JObject)sourceObject.DeepClone();
 			var transformations = new Stack<ITransformation>();
+
 			transformContext = transformContext ?? new TransformationInvokeContext
 			{
-				Source = source,
+				Source = sourceObject,
 			};
 
-			Walk(transformation, transformations);
+			Walk(transformationObject, transformations);
 
-			resultObject.Merge(transformation, MergeSettings);
+			resultObject.Merge(transformationObject, MergeSettings);
 
 			while(transformations.Count > 0)
 			{
-				transformations.Pop().ApplyTo(resultObject, transformContext);
+				var transformation = transformations.Pop();
+				transformation.OnError += errorHandler;
+				transformation.ApplyTo(resultObject, transformContext);
 			}
 
 			return resultObject;

@@ -3,12 +3,12 @@
 namespace JsonTransform
 {
 	/// <summary>
-	/// Контекст трансформации.
+	/// Transformation invoke context.
 	/// </summary>
 	public interface ITransformationInvokeContext
 	{
 		/// <summary>
-		/// Объект до трансформации.
+		/// Source object.
 		/// </summary>
 		JToken Source { get; }
 	}

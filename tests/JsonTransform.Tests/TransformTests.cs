@@ -1,7 +1,6 @@
 ﻿using System;
 
 using FluentAssertions;
-using JsonTransform.Tests.Properties;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
@@ -19,93 +18,100 @@ namespace JsonTransform.Tests
 		public void Transform_SetConstant_ShouldWork<TExpected>(string source, string transformation, TExpected expected)
 		{
 			// act
-			var resultObject = JsonTransformer.Transform(source, transformation);
+			var result = JsonTransformer.Transform(source, transformation);
 
 			// assert
-			resultObject["first"]["value"].Value<TExpected>().Should().Be(expected);
-			resultObject.ShouldNotContainTransformations();
+			result.Success.Should().BeTrue();
+			result.JObject["first"]["value"].Value<TExpected>().Should().Be(expected);
+			result.JObject.ShouldNotContainTransformations();
 		}
 
 		[Test]
 		public void Transform_SetConstantInEmptyArray_ShouldWork()
 		{
 			// act
-			var resultObject = JsonTransformer.Transform(JsonTemplates.EmptySource, JsonTemplates.SetConstToArray.Transformation);
+			var result = JsonTransformer.Transform(JsonTemplates.EmptySource, JsonTemplates.SetConstToArray.Transformation);
 
 			// assert
-			resultObject["array"][0]["value"].Value<string>().Should().Be("one");
-			resultObject["array"][1]["value"].Value<string>().Should().Be("two");
-			resultObject.ShouldNotContainTransformations();
+			result.Success.Should().BeTrue();
+			result.JObject["array"][0]["value"].Value<string>().Should().Be("one");
+			result.JObject["array"][1]["value"].Value<string>().Should().Be("two");
+			result.JObject.ShouldNotContainTransformations();
 		}
 
 		[Test]
 		public void Transform_SetConstantInArray_ShouldWork()
 		{
 			// act
-			var resultObject = JsonTransformer.Transform(JsonTemplates.SetConstToArray.Source, JsonTemplates.SetConstToArray.Transformation);
+			var result = JsonTransformer.Transform(JsonTemplates.SetConstToArray.Source, JsonTemplates.SetConstToArray.Transformation);
 
 			// assert
-			resultObject["array"][0]["value"].Value<string>().Should().Be("one");
-			resultObject["array"][0]["otherValue"].Value<int>().Should().Be(2);
-			resultObject["array"][0]["inner"]["innerValue1"].Value<string>().Should().Be("inner value 1");
-			resultObject["array"][0]["inner"]["innerValue2"].Value<string>().Should().Be("inner value 2");
-			resultObject["array"][1]["value"].Value<string>().Should().Be("two");
-			resultObject["array"][1]["inner"]["innerValue3"].Value<string>().Should().Be("inner value 3");
-			resultObject["array"][1]["inner"]["innerValue4"].Value<string>().Should().Be("inner value 4");
-			resultObject["array"][1]["inner"]["odd"].Value<string>().Should().Be("some odd property");
+			result.Success.Should().BeTrue();
+			result.JObject["array"][0]["value"].Value<string>().Should().Be("one");
+			result.JObject["array"][0]["otherValue"].Value<int>().Should().Be(2);
+			result.JObject["array"][0]["inner"]["innerValue1"].Value<string>().Should().Be("inner value 1");
+			result.JObject["array"][0]["inner"]["innerValue2"].Value<string>().Should().Be("inner value 2");
+			result.JObject["array"][1]["value"].Value<string>().Should().Be("two");
+			result.JObject["array"][1]["inner"]["innerValue3"].Value<string>().Should().Be("inner value 3");
+			result.JObject["array"][1]["inner"]["innerValue4"].Value<string>().Should().Be("inner value 4");
+			result.JObject["array"][1]["inner"]["odd"].Value<string>().Should().Be("some odd property");
 
 			// Because that way works MergeArrayHandling.Merge.
-			resultObject["array"][0]["innerArray"][0].Value<string>().Should().Be("Second");
+			result.JObject["array"][0]["innerArray"][0].Value<string>().Should().Be("Second");
 
-			resultObject.ShouldNotContainTransformations();
+			result.JObject.ShouldNotContainTransformations();
 		}
 
 		[Test]
 		public void Transform_SetNull_ShouldWork()
 		{
 			// act
-			var resultObject = JsonTransformer.Transform(JsonTemplates.SetNull.Source, JsonTemplates.SetNull.Transformation);
+			var result = JsonTransformer.Transform(JsonTemplates.SetNull.Source, JsonTemplates.SetNull.Transformation);
 
 			// assert
-			resultObject["first"]["value"].Value<string>().Should().BeNull();
-			resultObject["first"]["reallyNullValue"].Value<string>().Should().BeNull();
-			resultObject.ShouldNotContainTransformations();
+			result.Success.Should().BeTrue();
+			result.JObject["first"]["value"].Value<string>().Should().BeNull();
+			result.JObject["first"]["reallyNullValue"].Value<string>().Should().BeNull();
+			result.JObject.ShouldNotContainTransformations();
 		}
 
 		[Test]
 		public void Remove_FirstLevel_ShouldWork()
 		{
 			// act
-			var resultObject = JsonTransformer.Transform(JsonTemplates.RemoveNode.Source, JsonTemplates.RemoveNode.RemoveFirstLevel);
+			var result = JsonTransformer.Transform(JsonTemplates.RemoveNode.Source, JsonTemplates.RemoveNode.RemoveFirstLevel);
 
 			// assert
-			resultObject.Property("firstLevel").Should().BeNull();
-			resultObject["firstLevel1"].Value<bool>().Should().BeTrue();
-			resultObject.ShouldNotContainTransformations();
+			result.Success.Should().BeTrue();
+			result.JObject.Property("firstLevel").Should().BeNull();
+			result.JObject["firstLevel1"].Value<bool>().Should().BeTrue();
+			result.JObject.ShouldNotContainTransformations();
 		}
 
 		[Test]
 		public void Remove_SecondLevel_ShouldWork()
 		{
 			// act
-			var resultObject = JsonTransformer.Transform(JsonTemplates.RemoveNode.Source, JsonTemplates.RemoveNode.RemoveSecondLevel);
+			var result = JsonTransformer.Transform(JsonTemplates.RemoveNode.Source, JsonTemplates.RemoveNode.RemoveSecondLevel);
 
 			// assert
-			((JObject)resultObject["firstLevel"]).Property("secondLevel").Should().BeNull();
-			resultObject["firstLevel"]["secondLevel1"].Value<bool>().Should().BeTrue();
-			resultObject.ShouldNotContainTransformations();
+			result.Success.Should().BeTrue();
+			((JObject)result.JObject["firstLevel"]).Property("secondLevel").Should().BeNull();
+			result.JObject["firstLevel"]["secondLevel1"].Value<bool>().Should().BeTrue();
+			result.JObject.ShouldNotContainTransformations();
 		}
 
 		[Test]
 		public void Copy_ExistingObject_ShouldCopyAndLeaveSourceUntouched()
 		{
 			// act
-			var resultObject = JsonTransformer.Transform(JsonTemplates.CopyNode.SourceWithObject, JsonTemplates.CopyNode.Transformation);
+			var result = JsonTransformer.Transform(JsonTemplates.CopyNode.SourceWithObject, JsonTemplates.CopyNode.Transformation);
 
 			// assert
-			resultObject["target"]["value"].Value<bool>().Should().BeTrue();
-			resultObject["source"]["inner"]["value"].Value<bool>().Should().BeTrue();
-			resultObject.ShouldNotContainTransformations();
+			result.Success.Should().BeTrue();
+			result.JObject["target"]["value"].Value<bool>().Should().BeTrue();
+			result.JObject["source"]["inner"]["value"].Value<bool>().Should().BeTrue();
+			result.JObject.ShouldNotContainTransformations();
 		}
 
 		[TestCase(JsonTemplates.CopyNode.SourceWithString)]
@@ -116,57 +122,60 @@ namespace JsonTransform.Tests
 			const string Expected = "test";
 
 			// act
-			var resultObject = JsonTransformer.Transform(source, JsonTemplates.CopyNode.Transformation);
+			var result = JsonTransformer.Transform(source, JsonTemplates.CopyNode.Transformation);
 
 			// assert
-			resultObject["target"].Value<string>().Should().Be(Expected);
-			resultObject["source"]["inner"].Value<string>().Should().Be(Expected);
-			resultObject.ShouldNotContainTransformations();
+			result.Success.Should().BeTrue();
+			result.JObject["target"].Value<string>().Should().Be(Expected);
+			result.JObject["source"]["inner"].Value<string>().Should().Be(Expected);
+			result.JObject.ShouldNotContainTransformations();
 		}
 
 		[Test]
 		public void CopyRoot_ShouldCopyRoot()
 		{
 			// act
-			var resultObject = JsonTransformer.Transform(JsonTemplates.CopyNode.SourceWithObject, JsonTemplates.CopyNode.CopyRootTransformation);
+			var result = JsonTransformer.Transform(JsonTemplates.CopyNode.SourceWithObject, JsonTemplates.CopyNode.CopyRootTransformation);
 
 			// assert
-			resultObject["target"]["source"]["inner"]["value"].Value<bool>().Should().BeTrue();
-			resultObject.ShouldNotContainTransformations();
+			result.Success.Should().BeTrue();
+			result.JObject["target"]["source"]["inner"]["value"].Value<bool>().Should().BeTrue();
+			result.JObject.ShouldNotContainTransformations();
 		}
 
 		[Test]
 		public void ForEach_ShouldApplyTransformation_ToEachArrayItem()
 		{
 			// act
-			var resultObject = JsonTransformer.Transform(JsonTemplates.ForEach.Source, JsonTemplates.ForEach.Transformation);
-
-			Console.Out.WriteLine(resultObject.ToString());
+			var result = JsonTransformer.Transform(JsonTemplates.ForEach.Source, JsonTemplates.ForEach.Transformation);
 
 			// assert
-			((JArray)resultObject["array"]).Count.Should().Be(3);
-			resultObject.SelectToken("array[0].removeMe").Should().BeNull();
-			resultObject.SelectToken("array[1].removeMe").Should().BeNull();
-			resultObject.SelectToken("array[2].removeMe").Should().BeNull();
+			result.Success.Should().BeTrue();
+			((JArray)result.JObject["array"]).Count.Should().Be(3);
+			result.JObject.SelectToken("array[0].removeMe").Should().BeNull();
+			result.JObject.SelectToken("array[1].removeMe").Should().BeNull();
+			result.JObject.SelectToken("array[2].removeMe").Should().BeNull();
 
-			resultObject["array"][0]["target"].Value<string>().Should().Be("Expected");
-			resultObject["array"][1]["target"].Value<string>().Should().Be("Expected");
-			resultObject["array"][2]["target"].Value<string>().Should().Be("Expected");
+			result.JObject["array"][0]["target"].Value<string>().Should().Be("Expected");
+			result.JObject["array"][1]["target"].Value<string>().Should().Be("Expected");
+			result.JObject["array"][2]["target"].Value<string>().Should().Be("Expected");
 
-			resultObject.ShouldNotContainTransformations();
+			result.JObject.ShouldNotContainTransformations();
 		}
 
 		[Test]
 		public void ComplexTransformationTest()
 		{
 			// arrange
-			var expectedString = Resources.ComplexTransformation_Expected;
+			var expectedString = Resources.ComplexTransform.Expected;
 			var expectedObject = JObject.Parse(expectedString);
 
 			// act
-			var resultObject = JsonTransformer.Transform(Resources.ComplexTransformation_Source, Resources.ComplexTransformation_Transformation);
+			var result = JsonTransformer.Transform(Resources.ComplexTransform.Source, Resources.ComplexTransform.Transformation);
+			var resultObject = result.JObject;
 
 			// assert
+			result.Success.Should().BeTrue();
 			JToken.DeepEquals(resultObject, expectedObject).Should().BeTrue($"Expected to be {expectedString} but found {resultObject}");
 			resultObject.ShouldNotContainTransformations();
 		}

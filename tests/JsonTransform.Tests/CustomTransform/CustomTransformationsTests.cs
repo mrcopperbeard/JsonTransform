@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System;
+using FluentAssertions;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
@@ -32,11 +33,12 @@ namespace JsonTransform.Tests.CustomTransform
 		public void ApplyCustomTransformTest()
 		{
 			// act
-			var resultObject = JsonTransformer.Transform(JsonTemplates.Custom.Source, JsonTemplates.Custom.Transformation);
+			var result = JsonTransformer.Transform(JsonTemplates.Custom.Source, JsonTemplates.Custom.Transformation);
 
 			// assert
-			resultObject["root"]["value"].Value<string>().Should().Be(TestTransformation.Expected);
-			resultObject.ShouldNotContainTransformations();
+			result.Success.Should().BeTrue(string.Join(Environment.NewLine, result.Errors));
+			result.JObject["root"]["value"].Value<string>().Should().Be(TestTransformation.Expected);
+			result.JObject.ShouldNotContainTransformations();
 		}
 	}
 }

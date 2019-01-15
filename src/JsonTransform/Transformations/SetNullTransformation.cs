@@ -16,7 +16,7 @@ namespace JsonTransform.Transformations
 		/// <inheritdoc />
 		public override void ApplyTo(JObject target, ITransformationInvokeContext context)
 		{
-			var targetToken = (JValue)target.SelectToken(TargetPath);
+			var targetToken = (JValue)target.SelectToken(Context.TargetPath);
 
 			targetToken.Value = null;
 		}

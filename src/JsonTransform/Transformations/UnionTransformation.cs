@@ -31,14 +31,15 @@ namespace JsonTransform.Transformations
 		/// <inheritdoc />
 		public override void ApplyTo(JObject target, ITransformationInvokeContext context)
 		{
-			var token = target.SelectToken(TargetPath);
+			var token = target.SelectToken(Context.TargetPath);
 			switch (token)
 			{
 				case JArray array:
 					array.Merge(_argument, MergeSettings);
 					break;
 				default:
-					throw new NotImplementedException($"\"Add\" transformation for type {token.Type} is not implemented yet.");
+					OnErrorInternal($"\"Add\" transformation for type {token.Type} is not implemented yet.");
+					break;
 			}
 		}
 	}

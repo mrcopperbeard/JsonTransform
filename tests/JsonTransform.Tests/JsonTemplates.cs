@@ -4,6 +4,37 @@
 	{
 		public const string EmptySource = @"{}";
 
+		public static class Invalid
+		{
+			public const string Source = @"{
+	""root"": 1
+}";
+
+			public const string Transformation = @"{
+	""transform-foreach-root"": null,
+	""transform-copy-target"": ""not.existing.path""
+}";
+		}
+
+		public static class InvalidForEach
+		{
+			public const string Source = @"{
+	""array"": [{
+		""value"": 1
+	},{
+		""value"": 2
+	},{
+		""value"": 3
+	}]
+}";
+
+			public const string Transformation = @"{
+	""transform-foreach-array"": {
+			""transform-copy-target"": ""not.existing.path""
+	}
+}";
+		}
+
 		public static class SetConstString
 		{
 			public const string Source = @"{

@@ -2,7 +2,7 @@
 
 namespace JsonTransform.Tests.CustomTransform
 {
-	public class TestTransformation : BaseTransformation
+	internal class TestTransformation : BaseTransformation
 	{
 		public const string Expected = nameof(Expected);
 
@@ -12,7 +12,7 @@ namespace JsonTransform.Tests.CustomTransform
 
 		public override void ApplyTo(JObject target, ITransformationInvokeContext context)
 		{
-			var targetToken = (JValue)target.SelectToken(TargetPath);
+			var targetToken = (JValue)target.SelectToken(Context.TargetPath);
 
 			targetToken.Value = Expected;
 		}

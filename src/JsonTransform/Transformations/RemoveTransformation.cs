@@ -17,7 +17,7 @@ namespace JsonTransform.Transformations
 		/// <inheritdoc />
 		public override void ApplyTo(JObject target, ITransformationInvokeContext context)
 		{
-			var token = target.SelectToken(TargetPath);
+			var token = target.SelectToken(Context.TargetPath);
 			if (token == null)
 			{
 				return;
@@ -29,7 +29,7 @@ namespace JsonTransform.Transformations
 			}
 			catch (Exception e)
 			{
-				throw new InvalidOperationException($"Error while removing {token.Path}. {e.Message}", e);
+				OnErrorInternal($"Error while removing. {e.Message}");
 			}
 		}
 	}
